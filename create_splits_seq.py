@@ -12,7 +12,7 @@ parser.add_argument('--seed', type=int, default=1,
                     help='random seed (default: 1)')
 parser.add_argument('--k', type=int, default=10,
                     help='number of splits (default: 10)')
-parser.add_argument('--task', type=str, choices=['task_1_binary', 'task_2_multiclass'])
+parser.add_argument('--task', type=str, default='task_1_binary')
 parser.add_argument('--val_frac', type=float, default= 0.1,
                     help='fraction of labels for validation (default: 0.1)')
 parser.add_argument('--test_frac', type=float, default= 0.1,
@@ -32,7 +32,7 @@ if args.task == 'task_1_binary':
 
 elif args.task == 'task_2_multi':
     args.n_classes=3
-    dataset = Generic_WSI_Classification_Dataset(csv_path = 'dataset_csv/tumor_subtyping_dummy_clean.csv',
+    dataset = Generic_WSI_Classification_Dataset(csv_path = 'datasets/multi_lung_data.csv',
                             shuffle = False, 
                             seed = args.seed, 
                             print_info = True,

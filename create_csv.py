@@ -6,7 +6,7 @@ count = 0
 with open('multi_lung_data.csv', 'w') as f:
     writer = csv.writer(f)
     writer.writerow(header)
-    for phase in os.listdir(base_path):
+    for phase in ['train', 'val']:
         print('phase: ', phase)
         phase_path = os.path.join(base_path, phase)
         for c in os.listdir(phase_path):
@@ -27,7 +27,7 @@ with open('multi_lung_data.csv', 'w') as f:
                 patient_id = imagename[:12]
                 print('patient id: ', patient_id)
                 #dot_index = imagename.index('.')
-                slide_id = imagename[:-4]
+                slide_id = imagename[:-3]
                 print('slide id: ', slide_id)
                 writer.writerow([patient_id, slide_id, label])
                 count += 1
