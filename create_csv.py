@@ -1,15 +1,17 @@
 import os
 import csv
-base_path = '/work/deogun/alali/CLAM/datasets/multi_class_dataset/'
+base_path = '/work/deogun/alali/CLAM/datasets/'
 header = ['case_id', 'slide_id', 'label']
 count = 0
-with open('multi_lung_data.csv', 'w') as f:
+with open('datasets/test2_20x_files.csv', 'w') as f:
     writer = csv.writer(f)
     writer.writerow(header)
-    for phase in ['train', 'val']:
+    for phase in ['test2_20x']:
         print('phase: ', phase)
         phase_path = os.path.join(base_path, phase)
         for c in os.listdir(phase_path):
+            if('files' in c):
+                continue
             class_path = os.path.join(phase_path, c)
             print('class: ', c)
             label = None

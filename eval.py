@@ -40,19 +40,22 @@ parser.add_argument('--k_end', type=int, default=-1, help='end fold (default: -1
 parser.add_argument('--fold', type=int, default=-1, help='single fold to evaluate')
 parser.add_argument('--micro_average', action='store_true', default=False, 
                     help='use micro_average instead of macro_avearge for multiclass AUC')
-parser.add_argument('--split', type=str, choices=['train', 'val', 'test', 'all'], default='test')
+parser.add_argument('--split', type=str, help='train, val, test, or all', default='test')
 parser.add_argument('--task', type=str)
+parser.add_argument('--phase', type=str)
 args = parser.parse_args()
 
 device=torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 args.save_dir = os.path.join('./eval_results', 'EVAL_' + str(args.save_exp_code))
 args.models_dir = os.path.join(args.results_dir, str(args.models_exp_code))
+print('models_dir = ', args.models_dir)
 
 os.makedirs(args.save_dir, exist_ok=True)
 
 if args.splits_dir is None:
     args.splits_dir = args.models_dir
+print('splits_dir = ', args.splits_dir)
 
 assert os.path.isdir(args.models_dir)
 assert os.path.isdir(args.splits_dir)
@@ -80,10 +83,10 @@ if args.task == 'task_1_tumor_vs_normal':
                             patient_strat=False,
                             ignore=[])
 
-elif args.task == 'task_2_tumor_subtyping':
+elif args.task == 'task_2_multi':
     args.n_classes=3
-    dataset = Generic_MIL_Dataset(csv_path = 'dataset_csv/tumor_subtyping_dummy_clean.csv',
-                            data_dir= os.path.join(args.data_root_dir, 'tumor_subtyping_resnet_features'),
+    dataset = Generic_MIL_Dataset(csv_path = 'datasets/{}_files.csv'.format(args.phase),
+                            data_dir= os.path.join(args.data_root_dir, args.phase),
                             shuffle = False, 
                             print_info = True,
                             label_dict = {'subtype_1':0, 'subtype_2':1, 'subtype_3':2},
@@ -118,12 +121,14 @@ else:
     folds = range(args.fold, args.fold+1)
 ckpt_paths = [os.path.join(args.models_dir, 's_{}_checkpoint.pt'.format(fold)) for fold in folds]
 datasets_id = {'train': 0, 'val': 1, 'test': 2, 'all': -1}
+print('checkpoints path: ', ckpt_paths)
 
 if __name__ == "__main__":
     all_results = []
     all_auc = []
     all_acc = []
     for ckpt_idx in range(len(ckpt_paths)):
+        print('=============================== checkpoint [{}/{}] ==============='.format(ckpt_idx, len(ckpt_paths)))
         if datasets_id[args.split] < 0:
             split_dataset = dataset
         else:

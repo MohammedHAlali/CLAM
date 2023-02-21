@@ -12,14 +12,14 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--c', type=str, default='adc') #adc/scc/normal
 parser.add_argument('--phase', type=str, default='train') #train/val/test
 parser.add_argument('--tile_size', type=int, default=1024)
-parser.add_argument('--group', type=int, default=1) #1/2/3/4
+parser.add_argument('--group', type=str, default=1) #1/2/3/4
 args = parser.parse_args()
 phase = args.phase
 c = args.c
 group = args.group
 print('phase = ', phase, ' class= ', c)
 data_path = '/work/deogun/alali/data'
-out_path = os.path.join(data_path, 'lung_png', phase, c)
+out_path = os.path.join(data_path, 'lung_png20x', phase, c)
 if(not os.path.exists(out_path)):
     os.mkdir(out_path)
     print('directory created: ', out_path)
