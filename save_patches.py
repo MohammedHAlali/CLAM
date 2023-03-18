@@ -18,7 +18,7 @@ phase = args.phase
 c = args.c
 group = args.group
 print('phase = ', phase, ' class= ', c)
-data_path = '/work/deogun/alali/data'
+data_path = '/common/deogun/alali/data'
 out_path = os.path.join(data_path, 'lung_png20x', phase, c)
 if(not os.path.exists(out_path)):
     os.mkdir(out_path)

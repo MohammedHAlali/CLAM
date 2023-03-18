@@ -3,10 +3,10 @@ import csv
 base_path = '/work/deogun/alali/CLAM/datasets/'
 header = ['case_id', 'slide_id', 'label']
 count = 0
-with open('datasets/test2_20x_files.csv', 'w') as f:
+with open('datasets/test1_20x_binary.csv', 'w') as f:
     writer = csv.writer(f)
     writer.writerow(header)
-    for phase in ['test2_20x']:
+    for phase in ['train_20x_binary']:
         print('phase: ', phase)
         phase_path = os.path.join(base_path, phase)
         for c in os.listdir(phase_path):
