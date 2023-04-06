@@ -157,7 +157,7 @@ print('\nLoad Dataset')
 
 if args.task == 'task_1_binary':
     args.n_classes=2
-    dataset = Generic_MIL_Dataset(csv_path = 'dataset_csv/binary_lung_data.csv',
+    dataset = Generic_MIL_Dataset(csv_path = 'datasets/binary_lung_data.csv',
                             data_dir= os.path.join(args.data_root_dir, 'binary'),
                             shuffle = False, 
                             seed = args.seed, 
@@ -168,8 +168,8 @@ if args.task == 'task_1_binary':
 
 elif args.task == 'task_2_multi':
     args.n_classes=3
-    dataset = Generic_MIL_Dataset(csv_path = 'datasets/multi_lung_data.csv',
-                            data_dir= os.path.join(args.data_root_dir, 'multi_class_dataset'),
+    dataset = Generic_MIL_Dataset(csv_path = 'datasets/multi_class.csv',
+                            data_dir= os.path.join(args.data_root_dir, 'multi_class'),
                             shuffle = False,
                             seed = args.seed, 
                             print_info = True,

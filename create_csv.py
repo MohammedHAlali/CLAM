@@ -1,12 +1,12 @@
 import os
 import csv
-base_path = '/work/deogun/alali/CLAM/datasets/binary_20x'
+base_path = '/work/deogun/alali/CLAM/datasets/'
 header = ['case_id', 'slide_id', 'label']
 count = 0
-with open('datasets/binary_lung_data.csv', 'w') as f:
+with open('datasets/multi_test3.csv', 'w') as f:
     writer = csv.writer(f)
     writer.writerow(header)
-    for phase in ['train']:
+    for phase in ['test3_multi']:
         print('phase: ', phase)
         phase_path = os.path.join(base_path, phase)
         for c in os.listdir(phase_path):
@@ -15,12 +15,12 @@ with open('datasets/binary_lung_data.csv', 'w') as f:
             class_path = os.path.join(phase_path, c)
             print('class: ', c)
             label = None
-            if(c == 'cancer'):
-                label = 'tumor_tissue'
-            #elif(c == 'scc'):
-            #    label = 'subtype_2'
+            if(c == 'adc'):
+                label = 'subtype_1'
+            elif(c == 'scc'):
+                label = 'subtype_2'
             else:
-                label = 'normal_tissue'
+                label = 'subtype_3'
             print('label: ', label)
             h5_path = os.path.join(class_path, 'h5_files')
             print('h5 path: ', h5_path)

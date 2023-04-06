@@ -32,7 +32,7 @@ if args.task == 'task_1_binary':
 
 elif args.task == 'task_2_multi':
     args.n_classes=3
-    dataset = Generic_WSI_Classification_Dataset(csv_path = 'datasets/multi_data20x.csv',
+    dataset = Generic_WSI_Classification_Dataset(csv_path = 'datasets/multi_class.csv',
                             shuffle = False, 
                             seed = args.seed, 
                             print_info = True,

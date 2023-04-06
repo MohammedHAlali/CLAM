@@ -8,6 +8,7 @@ import torch.nn as nn
 import pdb
 import os
 import pandas as pd
+from sklearn import metrics
 from utils.utils import *
 from math import floor
 import matplotlib.pyplot as plt
@@ -73,10 +74,10 @@ with open(args.save_dir + '/eval_experiment_{}.txt'.format(args.save_exp_code), 
 f.close()
 
 print(settings)
-if args.task == 'task_1_tumor_vs_normal':
+if args.task == 'task_1_binary':
     args.n_classes=2
-    dataset = Generic_MIL_Dataset(csv_path = 'dataset_csv/tumor_vs_normal_dummy_clean.csv',
-                            data_dir= os.path.join(args.data_root_dir, 'tumor_vs_normal_resnet_features'),
+    dataset = Generic_MIL_Dataset(csv_path = 'datasets/binary_{}.csv'.format(args.phase),
+                            data_dir= os.path.join(args.data_root_dir, '{}_binary'.format(args.phase)),
                             shuffle = False, 
                             print_info = True,
                             label_dict = {'normal_tissue':0, 'tumor_tissue':1},
@@ -85,8 +86,8 @@ if args.task == 'task_1_tumor_vs_normal':
 
 elif args.task == 'task_2_multi':
     args.n_classes=3
-    dataset = Generic_MIL_Dataset(csv_path = 'datasets/{}_files.csv'.format(args.phase),
-                            data_dir= os.path.join(args.data_root_dir, args.phase),
+    dataset = Generic_MIL_Dataset(csv_path = 'datasets/multi_{}.csv'.format(args.phase),
+                            data_dir= os.path.join(args.data_root_dir, '{}_multi'.format(args.phase)),
                             shuffle = False, 
                             print_info = True,
                             label_dict = {'subtype_1':0, 'subtype_2':1, 'subtype_3':2},
@@ -127,6 +128,9 @@ if __name__ == "__main__":
     all_results = []
     all_auc = []
     all_acc = []
+    all_confusion_matrices = []
+    all_labels = []
+    all_preds = []
     for ckpt_idx in range(len(ckpt_paths)):
         print('=============================== checkpoint [{}/{}] ==============='.format(ckpt_idx, len(ckpt_paths)))
         if datasets_id[args.split] < 0:
@@ -135,12 +139,55 @@ if __name__ == "__main__":
             csv_path = '{}/splits_{}.csv'.format(args.splits_dir, folds[ckpt_idx])
             datasets = dataset.return_splits(from_id=False, csv_path=csv_path)
             split_dataset = datasets[datasets_id[args.split]]
-        model, patient_results, test_error, auc, df  = eval(split_dataset, args, ckpt_paths[ckpt_idx])
+        model, patient_results, test_error, auc, df, cm, results_dict  = eval(split_dataset, args, ckpt_paths[ckpt_idx])
         all_results.append(all_results)
         all_auc.append(auc)
         all_acc.append(1-test_error)
+        all_confusion_matrices.append(cm)
+        #all_labels.append(results_dict['Y'])
+        #all_preds.append(results_dict['Y_hat'])
         df.to_csv(os.path.join(args.save_dir, 'fold_{}.csv'.format(folds[ckpt_idx])), index=False)
-
+    #print('all confusion matrices: ', all_confusion_matrices)
+    #avg_all_labels = np.mean(all_labels, axis=0)
+    #avg_all_preds = np.mean(all_preds, axis=0)
+    #print('avg all labels = ', avg_all_labels)
+    #print('avg all preds = ', avg_all_preds)
+    #print('confusion matrix from avg labels and preds = \n', metrics.confusion_matrix(y_true=avg_all_labels, y_pred=avg_all_preds))
+    avg_cm = np.mean(all_confusion_matrices, axis=0)
+    print('average of all confusion matrices: \n', avg_cm)
+    print('average of all_auc: ', np.mean(all_auc))
+    print('average of all_acc: ', np.mean(all_acc))
+    #tn, fp, fn, tp = avg_confusion_matrix.ravel()
+    #print('tn={}, fp={}, fn={}, tp={}'.format(tn, fp, fn, tp))
+    if(avg_cm.shape[0] > 1):
+        print('multi class classification')
+        tp_0 = avg_cm[0, 0]
+        tn_0 = avg_cm[1,1]+avg_cm[2,2]+avg_cm[2,1]+avg_cm[1,2]
+        fp_0 = avg_cm[1,0]+avg_cm[2,0]
+        fn_0 = avg_cm[0,1]+avg_cm[0,2]
+        prec_0 = tp_0 / (tp_0 + fp_0)
+        recall_0 = tp_0 / (tp_0 + fn_0)
+        f1_0 = 2 * (prec_0 * recall_0) / (prec_0 + recall_0)
+        print('for class 0: tp = {}, tn = {}, fp = {}, fn = {}'.format(tp_0, tn_0, fp_0, fn_0))
+        print('precision: ', prec_0, ' recall: ', recall_0, 'f1: ', f1_0)
+        tp_1 = avg_cm[1, 1]
+        tn_1 = avg_cm[0,0]+avg_cm[2,2]+avg_cm[0,2]+avg_cm[2,0]
+        fp_1 = avg_cm[2,1]+avg_cm[0,1]
+        fn_1 = avg_cm[1,0]+avg_cm[1,2]
+        prec_1 = tp_1 / (tp_1 + fp_1)
+        recall_1 = tp_1 / (tp_1+fn_1)
+        f1_1 = 2 * (prec_1 * recall_1) / (prec_1 + recall_1)
+        print('for class 1: tp = {}, tn = {}, fp = {}, fn = {}'.format(tp_1, tn_1, fp_1, fn_1))
+        print('precision: ', prec_1, ' recall: ', recall_1, ' f1: ', f1_1)
+        tp_2 = avg_cm[2,2]
+        tn_2 = avg_cm[0,0]+avg_cm[1,1]+avg_cm[0,1]+avg_cm[1,0]
+        fp_2 = avg_cm[0,2]+avg_cm[1,2]
+        fn_2 = avg_cm[2,0]+avg_cm[2,1]
+        prec_2 = tp_2 / (tp_2 + fp_2)
+        recall_2 = tp_2 / (tp_2 + fn_2)
+        f1_2 = 2 * (prec_2 * recall_2) / (prec_2 + recall_2)
+        print('for class 2: tp = {}, tn = {}, fp = {}, fn = {}'.format(tp_2, tn_2, fp_2, fn_2))
+        print('precision: ', prec_2, ' recall: ', recall_2, ' f1: ', f1_2)
     final_df = pd.DataFrame({'folds': folds, 'test_auc': all_auc, 'test_acc': all_acc})
     if len(folds) != args.k:
         save_name = 'summary_partial_{}_{}.csv'.format(folds[0], folds[-1])
